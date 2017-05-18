@@ -995,7 +995,7 @@ void xen_setup_vcpu_info_placement(void)
 		pv_irq_ops.restore_fl = __PV_IS_CALLEE_SAVE(xen_restore_fl_direct);
 		pv_irq_ops.irq_disable = __PV_IS_CALLEE_SAVE(xen_irq_disable_direct);
 		pv_irq_ops.irq_enable = __PV_IS_CALLEE_SAVE(xen_irq_enable_direct);
-		pv_mmu_ops.read_cr2 = xen_read_cr2_direct;
+		pvfull_mmu_ops.read_cr2 = xen_read_cr2_direct;
 	}
 }
 
@@ -1309,8 +1309,10 @@ asmlinkage __visible void __init xen_start_kernel(void)
 #endif
 
 	if (xen_feature(XENFEAT_mmu_pt_update_preserve_ad)) {
-		pv_mmu_ops.ptep_modify_prot_start = xen_ptep_modify_prot_start;
-		pv_mmu_ops.ptep_modify_prot_commit = xen_ptep_modify_prot_commit;
+		pvfull_mmu_ops.ptep_modify_prot_start =
+			xen_ptep_modify_prot_start;
+		pvfull_mmu_ops.ptep_modify_prot_commit =
+			xen_ptep_modify_prot_commit;
 	}
 
 	machine_ops = xen_machine_ops;

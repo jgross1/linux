@@ -28,12 +28,9 @@
 #include <asm/bug.h>
 #include <asm/paravirt.h>
 #include <asm/setup.h>
-#include <asm/pgtable.h>
 #include <asm/time.h>
-#include <asm/pgalloc.h>
 #include <asm/irq.h>
 #include <asm/delay.h>
-#include <asm/fixmap.h>
 #include <asm/apic.h>
 #include <asm/tlbflush.h>
 #include <asm/timer.h>
@@ -179,98 +176,12 @@ unsigned paravirt_patch_insns(void *insnbuf, unsigned len,
 	return insn_len;
 }
 
-static void native_flush_tlb(void)
-{
-	__native_flush_tlb();
-}
-
-/*
- * Global pages have to be flushed a bit differently. Not a real
- * performance problem because this does not happen often.
- */
-static void native_flush_tlb_global(void)
-{
-	__native_flush_tlb_global();
-}
-
-static void native_flush_tlb_single(unsigned long addr)
-{
-	__native_flush_tlb_single(addr);
-}
-
 struct static_key paravirt_steal_enabled;
 struct static_key paravirt_steal_rq_enabled;
 
 static u64 native_steal_clock(int cpu)
 {
 	return 0;
-}
-
-static DEFINE_PER_CPU(enum paravirt_lazy_mode, paravirt_lazy_mode) = PARAVIRT_LAZY_NONE;
-
-static inline void enter_lazy(enum paravirt_lazy_mode mode)
-{
-	BUG_ON(this_cpu_read(paravirt_lazy_mode) != PARAVIRT_LAZY_NONE);
-
-	this_cpu_write(paravirt_lazy_mode, mode);
-}
-
-static void leave_lazy(enum paravirt_lazy_mode mode)
-{
-	BUG_ON(this_cpu_read(paravirt_lazy_mode) != mode);
-
-	this_cpu_write(paravirt_lazy_mode, PARAVIRT_LAZY_NONE);
-}
-
-void paravirt_enter_lazy_mmu(void)
-{
-	enter_lazy(PARAVIRT_LAZY_MMU);
-}
-
-void paravirt_leave_lazy_mmu(void)
-{
-	leave_lazy(PARAVIRT_LAZY_MMU);
-}
-
-void paravirt_flush_lazy_mmu(void)
-{
-	preempt_disable();
-
-	if (paravirt_get_lazy_mode() == PARAVIRT_LAZY_MMU) {
-		arch_leave_lazy_mmu_mode();
-		arch_enter_lazy_mmu_mode();
-	}
-
-	preempt_enable();
-}
-
-void paravirt_start_context_switch(struct task_struct *prev)
-{
-	BUG_ON(preemptible());
-
-	if (this_cpu_read(paravirt_lazy_mode) == PARAVIRT_LAZY_MMU) {
-		arch_leave_lazy_mmu_mode();
-		set_ti_thread_flag(task_thread_info(prev), TIF_LAZY_MMU_UPDATES);
-	}
-	enter_lazy(PARAVIRT_LAZY_CPU);
-}
-
-void paravirt_end_context_switch(struct task_struct *next)
-{
-	BUG_ON(preemptible());
-
-	leave_lazy(PARAVIRT_LAZY_CPU);
-
-	if (test_and_clear_ti_thread_flag(task_thread_info(next), TIF_LAZY_MMU_UPDATES))
-		arch_enter_lazy_mmu_mode();
-}
-
-enum paravirt_lazy_mode paravirt_get_lazy_mode(void)
-{
-	if (in_interrupt())
-		return PARAVIRT_LAZY_NONE;
-
-	return this_cpu_read(paravirt_lazy_mode);
 }
 
 struct pv_info pv_info = {
@@ -303,91 +214,9 @@ __visible struct pv_cpu_ops pv_cpu_ops = {
 	.io_delay = native_io_delay,
 };
 
-#if defined(CONFIG_X86_32) && !defined(CONFIG_X86_PAE)
-/* 32-bit pagetable entries */
-#define PTE_IDENT	__PV_IS_CALLEE_SAVE(_paravirt_ident_32)
-#else
-/* 64-bit pagetable entries */
-#define PTE_IDENT	__PV_IS_CALLEE_SAVE(_paravirt_ident_64)
-#endif
-
 struct pv_mmu_ops pv_mmu_ops __ro_after_init = {
-
-	.read_cr2 = native_read_cr2,
-	.write_cr2 = native_write_cr2,
-	.read_cr3 = native_read_cr3,
-	.write_cr3 = native_write_cr3,
-
-	.flush_tlb_user = native_flush_tlb,
-	.flush_tlb_kernel = native_flush_tlb_global,
-	.flush_tlb_single = native_flush_tlb_single,
 	.flush_tlb_others = native_flush_tlb_others,
-
-	.pgd_alloc = __paravirt_pgd_alloc,
-	.pgd_free = paravirt_nop,
-
-	.alloc_pte = paravirt_nop,
-	.alloc_pmd = paravirt_nop,
-	.alloc_pud = paravirt_nop,
-	.alloc_p4d = paravirt_nop,
-	.release_pte = paravirt_nop,
-	.release_pmd = paravirt_nop,
-	.release_pud = paravirt_nop,
-	.release_p4d = paravirt_nop,
-
-	.set_pte = native_set_pte,
-	.set_pte_at = native_set_pte_at,
-	.set_pmd = native_set_pmd,
-	.set_pmd_at = native_set_pmd_at,
-	.pte_update = paravirt_nop,
-
-	.ptep_modify_prot_start = __ptep_modify_prot_start,
-	.ptep_modify_prot_commit = __ptep_modify_prot_commit,
-
-#if CONFIG_PGTABLE_LEVELS >= 3
-#ifdef CONFIG_X86_PAE
-	.set_pte_atomic = native_set_pte_atomic,
-	.pte_clear = native_pte_clear,
-	.pmd_clear = native_pmd_clear,
-#endif
-	.set_pud = native_set_pud,
-	.set_pud_at = native_set_pud_at,
-
-	.pmd_val = PTE_IDENT,
-	.make_pmd = PTE_IDENT,
-
-#if CONFIG_PGTABLE_LEVELS >= 4
-	.pud_val = PTE_IDENT,
-	.make_pud = PTE_IDENT,
-
-	.set_p4d = native_set_p4d,
-
-#if CONFIG_PGTABLE_LEVELS >= 5
-	.p4d_val = PTE_IDENT,
-	.make_p4d = PTE_IDENT,
-
-	.set_pgd = native_set_pgd,
-#endif /* CONFIG_PGTABLE_LEVELS >= 5 */
-#endif /* CONFIG_PGTABLE_LEVELS >= 4 */
-#endif /* CONFIG_PGTABLE_LEVELS >= 3 */
-
-	.pte_val = PTE_IDENT,
-	.pgd_val = PTE_IDENT,
-
-	.make_pte = PTE_IDENT,
-	.make_pgd = PTE_IDENT,
-
-	.dup_mmap = paravirt_nop,
 	.exit_mmap = paravirt_nop,
-	.activate_mm = paravirt_nop,
-
-	.lazy_mode = {
-		.enter = paravirt_nop,
-		.leave = paravirt_nop,
-		.flush = paravirt_nop,
-	},
-
-	.set_fixmap = native_set_fixmap,
 };
 
 EXPORT_SYMBOL_GPL(pv_time_ops);

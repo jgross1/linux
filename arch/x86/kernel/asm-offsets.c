@@ -67,15 +67,17 @@ void common(void) {
 	OFFSET(PARAVIRT_PATCH_pv_irq_ops, paravirt_patch_template, pv_irq_ops);
 	OFFSET(PV_IRQ_irq_disable, pv_irq_ops, irq_disable);
 	OFFSET(PV_IRQ_irq_enable, pv_irq_ops, irq_enable);
-	OFFSET(PV_MMU_read_cr2, pv_mmu_ops, read_cr2);
 #endif
 #ifdef CONFIG_PARAVIRT_FULL
 	OFFSET(PARAVIRT_PATCH_pvfull_cpu_ops, paravirt_patch_template,
 	       pvfull_cpu_ops);
 	OFFSET(PARAVIRT_PATCH_pvfull_irq_ops, paravirt_patch_template,
 	       pvfull_irq_ops);
+	OFFSET(PARAVIRT_PATCH_pvfull_mmu_ops, paravirt_patch_template,
+	       pvfull_mmu_ops);
 	OFFSET(PV_CPU_iret, pvfull_cpu_ops, iret);
 	OFFSET(PV_CPU_read_cr0, pvfull_cpu_ops, read_cr0);
+	OFFSET(PV_MMU_read_cr2, pvfull_mmu_ops, read_cr2);
 #endif
 
 #ifdef CONFIG_XEN

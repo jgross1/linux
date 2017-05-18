@@ -89,14 +89,6 @@ struct pv_init_ops {
 			  unsigned long addr, unsigned len);
 };
 
-
-struct pv_lazy_ops {
-	/* Set deferred update mode, used for batching operations. */
-	void (*enter)(void);
-	void (*leave)(void);
-	void (*flush)(void);
-};
-
 struct pv_time_ops {
 	unsigned long long (*sched_clock)(void);
 	unsigned long long (*steal_clock)(int cpu);
@@ -123,111 +115,11 @@ struct pv_irq_ops {
 };
 
 struct pv_mmu_ops {
-	unsigned long (*read_cr2)(void);
-	void (*write_cr2)(unsigned long);
-
-	unsigned long (*read_cr3)(void);
-	void (*write_cr3)(unsigned long);
-
-	/*
-	 * Hooks for intercepting the creation/use/destruction of an
-	 * mm_struct.
-	 */
-	void (*activate_mm)(struct mm_struct *prev,
-			    struct mm_struct *next);
-	void (*dup_mmap)(struct mm_struct *oldmm,
-			 struct mm_struct *mm);
 	void (*exit_mmap)(struct mm_struct *mm);
-
-
-	/* TLB operations */
-	void (*flush_tlb_user)(void);
-	void (*flush_tlb_kernel)(void);
-	void (*flush_tlb_single)(unsigned long addr);
 	void (*flush_tlb_others)(const struct cpumask *cpus,
 				 struct mm_struct *mm,
 				 unsigned long start,
 				 unsigned long end);
-
-	/* Hooks for allocating and freeing a pagetable top-level */
-	int  (*pgd_alloc)(struct mm_struct *mm);
-	void (*pgd_free)(struct mm_struct *mm, pgd_t *pgd);
-
-	/*
-	 * Hooks for allocating/releasing pagetable pages when they're
-	 * attached to a pagetable
-	 */
-	void (*alloc_pte)(struct mm_struct *mm, unsigned long pfn);
-	void (*alloc_pmd)(struct mm_struct *mm, unsigned long pfn);
-	void (*alloc_pud)(struct mm_struct *mm, unsigned long pfn);
-	void (*alloc_p4d)(struct mm_struct *mm, unsigned long pfn);
-	void (*release_pte)(unsigned long pfn);
-	void (*release_pmd)(unsigned long pfn);
-	void (*release_pud)(unsigned long pfn);
-	void (*release_p4d)(unsigned long pfn);
-
-	/* Pagetable manipulation functions */
-	void (*set_pte)(pte_t *ptep, pte_t pteval);
-	void (*set_pte_at)(struct mm_struct *mm, unsigned long addr,
-			   pte_t *ptep, pte_t pteval);
-	void (*set_pmd)(pmd_t *pmdp, pmd_t pmdval);
-	void (*set_pmd_at)(struct mm_struct *mm, unsigned long addr,
-			   pmd_t *pmdp, pmd_t pmdval);
-	void (*set_pud_at)(struct mm_struct *mm, unsigned long addr,
-			   pud_t *pudp, pud_t pudval);
-	void (*pte_update)(struct mm_struct *mm, unsigned long addr,
-			   pte_t *ptep);
-
-	pte_t (*ptep_modify_prot_start)(struct mm_struct *mm, unsigned long addr,
-					pte_t *ptep);
-	void (*ptep_modify_prot_commit)(struct mm_struct *mm, unsigned long addr,
-					pte_t *ptep, pte_t pte);
-
-	struct paravirt_callee_save pte_val;
-	struct paravirt_callee_save make_pte;
-
-	struct paravirt_callee_save pgd_val;
-	struct paravirt_callee_save make_pgd;
-
-#if CONFIG_PGTABLE_LEVELS >= 3
-#ifdef CONFIG_X86_PAE
-	void (*set_pte_atomic)(pte_t *ptep, pte_t pteval);
-	void (*pte_clear)(struct mm_struct *mm, unsigned long addr,
-			  pte_t *ptep);
-	void (*pmd_clear)(pmd_t *pmdp);
-
-#endif	/* CONFIG_X86_PAE */
-
-	void (*set_pud)(pud_t *pudp, pud_t pudval);
-
-	struct paravirt_callee_save pmd_val;
-	struct paravirt_callee_save make_pmd;
-
-#if CONFIG_PGTABLE_LEVELS >= 4
-	struct paravirt_callee_save pud_val;
-	struct paravirt_callee_save make_pud;
-
-	void (*set_p4d)(p4d_t *p4dp, p4d_t p4dval);
-
-#if CONFIG_PGTABLE_LEVELS >= 5
-	struct paravirt_callee_save p4d_val;
-	struct paravirt_callee_save make_p4d;
-
-	void (*set_pgd)(pgd_t *pgdp, pgd_t pgdval);
-#endif	/* CONFIG_PGTABLE_LEVELS >= 5 */
-
-#endif	/* CONFIG_PGTABLE_LEVELS >= 4 */
-
-#endif	/* CONFIG_PGTABLE_LEVELS >= 3 */
-
-	struct pv_lazy_ops lazy_mode;
-
-	/* dom0 ops */
-
-	/* Sometimes the physical address is a pfn, and sometimes its
-	   an mfn.  We can tell which is which from the index. */
-	void (*set_fixmap)(unsigned /* enum fixed_addresses */ idx,
-			   phys_addr_t phys, pgprot_t flags);
 };
 
 struct arch_spinlock;
@@ -260,6 +152,7 @@ struct paravirt_patch_template {
 #ifdef CONFIG_PARAVIRT_FULL
 	struct pvfull_cpu_ops pvfull_cpu_ops;
 	struct pvfull_irq_ops pvfull_irq_ops;
+	struct pvfull_mmu_ops pvfull_mmu_ops;
 #endif
 };
 
@@ -598,14 +491,6 @@ enum paravirt_lazy_mode {
 	PARAVIRT_LAZY_MMU,
 	PARAVIRT_LAZY_CPU,
 };
-
-enum paravirt_lazy_mode paravirt_get_lazy_mode(void);
-void paravirt_start_context_switch(struct task_struct *prev);
-void paravirt_end_context_switch(struct task_struct *next);
-
-void paravirt_enter_lazy_mmu(void);
-void paravirt_leave_lazy_mmu(void);
-void paravirt_flush_lazy_mmu(void);
 
 void _paravirt_nop(void);
 u32 _paravirt_ident_32(u32);

@@ -2238,7 +2238,7 @@ static void __init xen_write_cr3_init(unsigned long cr3)
 	set_page_prot(initial_page_table, PAGE_KERNEL);
 	set_page_prot(initial_kernel_pmd, PAGE_KERNEL);
 
-	pv_mmu_ops.write_cr3 = &xen_write_cr3;
+	pvfull_mmu_ops.write_cr3 = &xen_write_cr3;
 }
 
 /*
@@ -2389,27 +2389,27 @@ static void xen_set_fixmap(unsigned idx, phys_addr_t phys, pgprot_t prot)
 
 static void __init xen_post_allocator_init(void)
 {
-	pv_mmu_ops.set_pte = xen_set_pte;
-	pv_mmu_ops.set_pmd = xen_set_pmd;
-	pv_mmu_ops.set_pud = xen_set_pud;
+	pvfull_mmu_ops.set_pte = xen_set_pte;
+	pvfull_mmu_ops.set_pmd = xen_set_pmd;
+	pvfull_mmu_ops.set_pud = xen_set_pud;
 #if CONFIG_PGTABLE_LEVELS >= 4
-	pv_mmu_ops.set_p4d = xen_set_p4d;
+	pvfull_mmu_ops.set_p4d = xen_set_p4d;
 #endif
 
 	/* This will work as long as patching hasn't happened yet
 	   (which it hasn't) */
-	pv_mmu_ops.alloc_pte = xen_alloc_pte;
-	pv_mmu_ops.alloc_pmd = xen_alloc_pmd;
-	pv_mmu_ops.release_pte = xen_release_pte;
-	pv_mmu_ops.release_pmd = xen_release_pmd;
+	pvfull_mmu_ops.alloc_pte = xen_alloc_pte;
+	pvfull_mmu_ops.alloc_pmd = xen_alloc_pmd;
+	pvfull_mmu_ops.release_pte = xen_release_pte;
+	pvfull_mmu_ops.release_pmd = xen_release_pmd;
 #if CONFIG_PGTABLE_LEVELS >= 4
-	pv_mmu_ops.alloc_pud = xen_alloc_pud;
-	pv_mmu_ops.release_pud = xen_release_pud;
+	pvfull_mmu_ops.alloc_pud = xen_alloc_pud;
+	pvfull_mmu_ops.release_pud = xen_release_pud;
 #endif
-	pv_mmu_ops.make_pte = PV_CALLEE_SAVE(xen_make_pte);
+	pvfull_mmu_ops.make_pte = PV_CALLEE_SAVE(xen_make_pte);
 
 #ifdef CONFIG_X86_64
-	pv_mmu_ops.write_cr3 = &xen_write_cr3;
+	pvfull_mmu_ops.write_cr3 = &xen_write_cr3;
 	SetPagePinned(virt_to_page(level3_user_vsyscall));
 #endif
 	xen_mark_init_mm_pinned();
@@ -2423,7 +2423,7 @@ static void xen_leave_lazy_mmu(void)
 	preempt_enable();
 }
 
-static const struct pv_mmu_ops xen_mmu_ops __initconst = {
+static const struct pvfull_mmu_ops xen_mmu_ops __initconst = {
 	.read_cr2 = xen_read_cr2,
 	.write_cr2 = xen_write_cr2,
 
@@ -2433,7 +2433,6 @@ static const struct pv_mmu_ops xen_mmu_ops __initconst = {
 	.flush_tlb_user = xen_flush_tlb,
 	.flush_tlb_kernel = xen_flush_tlb,
 	.flush_tlb_single = xen_flush_tlb_single,
-	.flush_tlb_others = xen_flush_tlb_others,
 
 	.pte_update = paravirt_nop,
 
@@ -2479,7 +2478,6 @@ static const struct pv_mmu_ops xen_mmu_ops __initconst = {
 
 	.activate_mm = xen_activate_mm,
 	.dup_mmap = xen_dup_mmap,
-	.exit_mmap = xen_exit_mmap,
 
 	.lazy_mode = {
 		.enter = paravirt_enter_lazy_mmu,
@@ -2494,7 +2492,9 @@ void __init xen_init_mmu_ops(void)
 {
 	x86_init.paging.pagetable_init = xen_pagetable_init;
 
-	pv_mmu_ops = xen_mmu_ops;
+	pvfull_mmu_ops = xen_mmu_ops;
+	pv_mmu_ops.flush_tlb_others = xen_flush_tlb_others;
+	pv_mmu_ops.exit_mmap = xen_exit_mmap;
 
 	memset(dummy_mapping, 0xff, PAGE_SIZE);
 }

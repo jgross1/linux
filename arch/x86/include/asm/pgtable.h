@@ -38,9 +38,9 @@ extern struct list_head pgd_list;
 
 extern struct mm_struct *pgd_page_get_mm(struct page *page);
 
-#ifdef CONFIG_PARAVIRT
+#ifdef CONFIG_PARAVIRT_FULL
 #include <asm/paravirt.h>
-#else  /* !CONFIG_PARAVIRT */
+#else  /* !CONFIG_PARAVIRT_FULL */
 #define set_pte(ptep, pte)		native_set_pte(ptep, pte)
 #define set_pte_at(mm, addr, ptep, pte)	native_set_pte_at(mm, addr, ptep, pte)
 #define set_pmd_at(mm, addr, pmdp, pmd)	native_set_pmd_at(mm, addr, pmdp, pmd)
@@ -97,10 +97,6 @@ extern struct mm_struct *pgd_page_get_mm(struct page *page);
 
 #define pte_val(x)	native_pte_val(x)
 #define __pte(x)	native_make_pte(x)
-
-#endif	/* CONFIG_PARAVIRT */
-
-#ifndef CONFIG_PARAVIRT_FULL
 
 #define arch_end_context_switch(prev)	do {} while (0)
 

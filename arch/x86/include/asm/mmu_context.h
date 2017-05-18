@@ -12,12 +12,12 @@
 #include <asm/tlbflush.h>
 #include <asm/paravirt.h>
 #include <asm/mpx.h>
-#ifndef CONFIG_PARAVIRT
+#ifndef CONFIG_PARAVIRT_FULL
 static inline void paravirt_activate_mm(struct mm_struct *prev,
 					struct mm_struct *next)
 {
 }
-#endif	/* !CONFIG_PARAVIRT */
+#endif	/* !CONFIG_PARAVIRT_FULL */
 
 #ifdef CONFIG_PERF_EVENTS
 extern struct static_key rdpmc_always_available;

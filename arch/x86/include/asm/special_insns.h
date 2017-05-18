@@ -135,7 +135,7 @@ static inline void native_wbinvd(void)
 
 extern asmlinkage void native_load_gs_index(unsigned);
 
-#ifdef CONFIG_PARAVIRT
+#ifdef CONFIG_PARAVIRT_FULL
 #include <asm/paravirt.h>
 #else
 
@@ -158,10 +158,6 @@ static inline void write_cr3(unsigned long x)
 {
 	native_write_cr3(x);
 }
-
-#endif/* CONFIG_PARAVIRT */
-
-#ifndef CONFIG_PARAVIRT_FULL
 
 static inline unsigned long read_cr0(void)
 {

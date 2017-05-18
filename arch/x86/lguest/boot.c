@@ -753,7 +753,7 @@ static void lguest_pmd_clear(pmd_t *pmdp)
 #endif
 
 /*
- * Unfortunately for Lguest, the pv_mmu_ops for page tables were based on
+ * Unfortunately for Lguest, the pvfull_mmu_ops for page tables were based on
  * native page table operations.  On native hardware you can set a new page
  * table entry whenever you want, but if you want to remove one you have to do
  * a TLB flush (a TLB is a little cache of page table entries kept by the CPU).
@@ -1431,25 +1431,25 @@ __init void lguest_init(void)
 	pvfull_cpu_ops.end_context_switch = lguest_end_context_switch;
 
 	/* Pagetable management */
-	pv_mmu_ops.write_cr3 = lguest_write_cr3;
-	pv_mmu_ops.flush_tlb_user = lguest_flush_tlb_user;
-	pv_mmu_ops.flush_tlb_single = lguest_flush_tlb_single;
-	pv_mmu_ops.flush_tlb_kernel = lguest_flush_tlb_kernel;
-	pv_mmu_ops.set_pte = lguest_set_pte;
-	pv_mmu_ops.set_pte_at = lguest_set_pte_at;
-	pv_mmu_ops.set_pmd = lguest_set_pmd;
+	pvfull_mmu_ops.write_cr3 = lguest_write_cr3;
+	pvfull_mmu_ops.flush_tlb_user = lguest_flush_tlb_user;
+	pvfull_mmu_ops.flush_tlb_single = lguest_flush_tlb_single;
+	pvfull_mmu_ops.flush_tlb_kernel = lguest_flush_tlb_kernel;
+	pvfull_mmu_ops.set_pte = lguest_set_pte;
+	pvfull_mmu_ops.set_pte_at = lguest_set_pte_at;
+	pvfull_mmu_ops.set_pmd = lguest_set_pmd;
 #ifdef CONFIG_X86_PAE
-	pv_mmu_ops.set_pte_atomic = lguest_set_pte_atomic;
-	pv_mmu_ops.pte_clear = lguest_pte_clear;
-	pv_mmu_ops.pmd_clear = lguest_pmd_clear;
-	pv_mmu_ops.set_pud = lguest_set_pud;
+	pvfull_mmu_ops.set_pte_atomic = lguest_set_pte_atomic;
+	pvfull_mmu_ops.pte_clear = lguest_pte_clear;
+	pvfull_mmu_ops.pmd_clear = lguest_pmd_clear;
+	pvfull_mmu_ops.set_pud = lguest_set_pud;
 #endif
-	pv_mmu_ops.read_cr2 = lguest_read_cr2;
-	pv_mmu_ops.read_cr3 = lguest_read_cr3;
-	pv_mmu_ops.lazy_mode.enter = paravirt_enter_lazy_mmu;
-	pv_mmu_ops.lazy_mode.leave = lguest_leave_lazy_mmu_mode;
-	pv_mmu_ops.lazy_mode.flush = paravirt_flush_lazy_mmu;
-	pv_mmu_ops.pte_update = lguest_pte_update;
+	pvfull_mmu_ops.read_cr2 = lguest_read_cr2;
+	pvfull_mmu_ops.read_cr3 = lguest_read_cr3;
+	pvfull_mmu_ops.lazy_mode.enter = paravirt_enter_lazy_mmu;
+	pvfull_mmu_ops.lazy_mode.leave = lguest_leave_lazy_mmu_mode;
+	pvfull_mmu_ops.lazy_mode.flush = paravirt_flush_lazy_mmu;
+	pvfull_mmu_ops.pte_update = lguest_pte_update;
 
 #ifdef CONFIG_X86_LOCAL_APIC
 	/* APIC read/write intercepts */
