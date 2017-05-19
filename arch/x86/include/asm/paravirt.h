@@ -26,8 +26,6 @@ static inline enum paravirt_lazy_mode paravirt_get_lazy_mode(void)
 
 #endif
 
-#define get_kernel_rpl()  (pv_info.kernel_rpl)
-
 static inline unsigned long long paravirt_sched_clock(void)
 {
 	return PVOP_CALL0(unsigned long long, pv_time_ops.sched_clock);

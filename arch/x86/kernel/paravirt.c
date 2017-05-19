@@ -125,6 +125,7 @@ static void *get_call_destination(u8 type)
 #ifdef CONFIG_PARAVIRT_FULL
 		.pvfull_cpu_ops = pvfull_cpu_ops,
 		.pvfull_irq_ops = pvfull_irq_ops,
+		.pvfull_mmu_ops = pvfull_mmu_ops,
 #endif
 	};
 	return *((void **)&tmpl + type);
@@ -186,12 +187,6 @@ static u64 native_steal_clock(int cpu)
 
 struct pv_info pv_info = {
 	.name = "bare hardware",
-	.kernel_rpl = 0,
-	.shared_kernel_pmd = 1,	/* Only used when CONFIG_X86_PAE is set */
-
-#ifdef CONFIG_X86_64
-	.extra_user_64bit_cs = __USER_CS,
-#endif
 };
 
 struct pv_init_ops pv_init_ops = {
@@ -222,5 +217,5 @@ struct pv_mmu_ops pv_mmu_ops __ro_after_init = {
 EXPORT_SYMBOL_GPL(pv_time_ops);
 EXPORT_SYMBOL    (pv_cpu_ops);
 EXPORT_SYMBOL    (pv_mmu_ops);
-EXPORT_SYMBOL_GPL(pv_info);
+EXPORT_SYMBOL    (pv_info);
 EXPORT_SYMBOL    (pv_irq_ops);

@@ -19,8 +19,8 @@ typedef union {
 } pte_t;
 #endif	/* !__ASSEMBLY__ */
 
-#ifdef CONFIG_PARAVIRT
-#define SHARED_KERNEL_PMD	(pv_info.shared_kernel_pmd)
+#ifdef CONFIG_PARAVIRT_FULL
+#define SHARED_KERNEL_PMD	(pvfull_info.shared_kernel_pmd)
 #else
 #define SHARED_KERNEL_PMD	1
 #endif

@@ -3,6 +3,8 @@
 
 #ifndef __ASSEMBLY__
 
+#define get_kernel_rpl()	(pvfull_info.kernel_rpl)
+
 static inline void load_sp0(struct tss_struct *tss,
 			    struct thread_struct *thread)
 {

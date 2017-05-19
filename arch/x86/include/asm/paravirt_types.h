@@ -66,13 +66,6 @@ struct paravirt_callee_save {
 
 /* general info */
 struct pv_info {
-	unsigned int kernel_rpl;
-	int shared_kernel_pmd;
-
-#ifdef CONFIG_X86_64
-	u16 extra_user_64bit_cs;  /* __USER_CS if none */
-#endif
-
 	const char *name;
 };
 

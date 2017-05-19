@@ -116,6 +116,15 @@ static void native_flush_tlb_single(unsigned long addr)
 	__native_flush_tlb_single(addr);
 }
 
+struct pvfull_info pvfull_info = {
+	.kernel_rpl = 0,
+	.shared_kernel_pmd = 1, /* Only used when CONFIG_X86_PAE is set */
+
+#ifdef CONFIG_X86_64
+	.extra_user_64bit_cs = __USER_CS,
+#endif
+};
+
 __visible struct pvfull_cpu_ops pvfull_cpu_ops = {
 	.cpuid = native_cpuid,
 	.get_debugreg = native_get_debugreg,
@@ -262,6 +271,7 @@ NOKPROBE_SYMBOL(native_get_debugreg);
 NOKPROBE_SYMBOL(native_set_debugreg);
 NOKPROBE_SYMBOL(native_load_idt);
 
+EXPORT_SYMBOL_GPL(pvfull_info);
 EXPORT_SYMBOL(pvfull_cpu_ops);
 EXPORT_SYMBOL_GPL(pvfull_irq_ops);
 EXPORT_SYMBOL(pvfull_mmu_ops);

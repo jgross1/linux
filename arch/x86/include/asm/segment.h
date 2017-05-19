@@ -210,7 +210,7 @@
 
 #endif
 
-#ifndef CONFIG_PARAVIRT
+#ifndef CONFIG_PARAVIRT_FULL
 # define get_kernel_rpl()		0
 #endif
 

@@ -1052,13 +1052,12 @@ static unsigned xen_patch(u8 type, u16 clobbers, void *insnbuf,
 	return ret;
 }
 
-static const struct pv_info xen_info __initconst = {
+static const struct pvfull_info xen_info __initconst = {
 	.shared_kernel_pmd = 0,
 
 #ifdef CONFIG_X86_64
 	.extra_user_64bit_cs = FLAT_USER_CS64,
 #endif
-	.name = "Xen",
 };
 
 static const struct pv_init_ops xen_init_ops __initconst = {
@@ -1260,7 +1259,8 @@ asmlinkage __visible void __init xen_start_kernel(void)
 	xen_setup_machphys_mapping();
 
 	/* Install Xen paravirt ops */
-	pv_info = xen_info;
+	pvfull_info = xen_info;
+	pv_info.name = "Xen";
 	pv_init_ops = xen_init_ops;
 	pvfull_cpu_ops = xen_cpu_ops;
 	pv_cpu_ops.io_delay = xen_io_delay;
@@ -1351,11 +1351,11 @@ asmlinkage __visible void __init xen_start_kernel(void)
 	/* keep using Xen gdt for now; no urgent need to change it */
 
 #ifdef CONFIG_X86_32
-	pv_info.kernel_rpl = 1;
+	pvfull_info.kernel_rpl = 1;
 	if (xen_feature(XENFEAT_supervisor_mode_kernel))
-		pv_info.kernel_rpl = 0;
+		pvfull_info.kernel_rpl = 0;
 #else
-	pv_info.kernel_rpl = 0;
+	pvfull_info.kernel_rpl = 0;
 #endif
 	/* set the limit of our address space */
 	xen_reserve_top();

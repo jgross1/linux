@@ -1,6 +1,15 @@
 #ifndef _ASM_X86_PARAVIRT_TYPES_FULL_H
 #define _ASM_X86_PARAVIRT_TYPES_FULL_H
 
+struct pvfull_info {
+	unsigned int kernel_rpl;
+	int shared_kernel_pmd;
+
+#ifdef CONFIG_X86_64
+	u16 extra_user_64bit_cs;	/* __USER_CS if none */
+#endif
+};
+
 struct pv_lazy_ops {
 	/* Set deferred update mode, used for batching operations. */
 	void (*enter)(void);
@@ -193,6 +202,7 @@ struct pvfull_mmu_ops {
 			   phys_addr_t phys, pgprot_t flags);
 };
 
+extern struct pvfull_info pvfull_info;
 extern struct pvfull_cpu_ops pvfull_cpu_ops;
 extern struct pvfull_irq_ops pvfull_irq_ops;
 extern struct pvfull_mmu_ops pvfull_mmu_ops;

@@ -1390,9 +1390,9 @@ __init void lguest_init(void)
 	/* We're under lguest. */
 	pv_info.name = "lguest";
 	/* We're running at privilege level 1, not 0 as normal. */
-	pv_info.kernel_rpl = 1;
+	pvfull_info.kernel_rpl = 1;
 	/* Everyone except Xen runs with this set. */
-	pv_info.shared_kernel_pmd = 1;
+	pvfull_info.shared_kernel_pmd = 1;
 
 	/*
 	 * We set up all the lguest overrides for sensitive operations.  These
