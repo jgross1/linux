@@ -1351,8 +1351,8 @@ static const struct lguest_insns
 {
 	const char *start, *end;
 } lguest_insns[] = {
-	[PARAVIRT_PATCH(pv_irq_ops.irq_disable)] = { lgstart_cli, lgend_cli },
-	[PARAVIRT_PATCH(pv_irq_ops.save_fl)] = { lgstart_pushf, lgend_pushf },
+	[PARAVIRT_PATCH(pv_ops.irq_disable)] = { lgstart_cli, lgend_cli },
+	[PARAVIRT_PATCH(pv_ops.save_fl)] = { lgstart_pushf, lgend_pushf },
 };
 
 /*
@@ -1388,7 +1388,10 @@ static unsigned lguest_patch(u8 type, u16 clobber, void *ibuf,
 __init void lguest_init(void)
 {
 	/* We're under lguest. */
-	pv_info.name = "lguest";
+	pv_ops.name = "lguest";
+	/* Setup operations */
+	pv_ops.patch = lguest_patch;
+
 	/* We're running at privilege level 1, not 0 as normal. */
 	pvfull_info.kernel_rpl = 1;
 	/* Everyone except Xen runs with this set. */
@@ -1400,14 +1403,11 @@ __init void lguest_init(void)
 	 */
 
 	/* Interrupt-related operations */
-	pv_irq_ops.save_fl = PV_CALLEE_SAVE(lguest_save_fl);
-	pv_irq_ops.restore_fl = __PV_IS_CALLEE_SAVE(lg_restore_fl);
-	pv_irq_ops.irq_disable = PV_CALLEE_SAVE(lguest_irq_disable);
-	pv_irq_ops.irq_enable = __PV_IS_CALLEE_SAVE(lg_irq_enable);
+	pv_ops.save_fl = PV_CALLEE_SAVE(lguest_save_fl);
+	pv_ops.restore_fl = __PV_IS_CALLEE_SAVE(lg_restore_fl);
+	pv_ops.irq_disable = PV_CALLEE_SAVE(lguest_irq_disable);
+	pv_ops.irq_enable = __PV_IS_CALLEE_SAVE(lg_irq_enable);
 	pvfull_irq_ops.safe_halt = lguest_safe_halt;
-
-	/* Setup operations */
-	pv_init_ops.patch = lguest_patch;
 
 	/* Intercepts of various CPU instructions */
 	pvfull_cpu_ops.load_gdt = lguest_load_gdt;

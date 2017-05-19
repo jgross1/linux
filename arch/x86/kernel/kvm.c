@@ -280,10 +280,10 @@ NOKPROBE_SYMBOL(do_async_page_fault);
 
 static void __init paravirt_ops_setup(void)
 {
-	pv_info.name = "KVM";
+	pv_ops.name = "KVM";
 
 	if (kvm_para_has_feature(KVM_FEATURE_NOP_IO_DELAY))
-		pv_cpu_ops.io_delay = kvm_io_delay;
+		pv_ops.io_delay = kvm_io_delay;
 
 #ifdef CONFIG_X86_IO_APIC
 	no_timer_check = 1;
@@ -467,7 +467,7 @@ void __init kvm_guest_init(void)
 
 	if (kvm_para_has_feature(KVM_FEATURE_STEAL_TIME)) {
 		has_steal_clock = 1;
-		pv_time_ops.steal_clock = kvm_steal_clock;
+		pv_ops.steal_clock = kvm_steal_clock;
 	}
 
 	if (kvm_para_has_feature(KVM_FEATURE_PV_EOI))

@@ -63,7 +63,7 @@ u64 notrace _paravirt_ident_64(u64 x)
 void __init default_banner(void)
 {
 	printk(KERN_INFO "Booting paravirtualized kernel on %s\n",
-	       pv_info.name);
+	       pv_ops.name);
 }
 
 /* Undefined instruction for dealing with missing ops pointers. */
@@ -114,11 +114,7 @@ unsigned paravirt_patch_jmp(void *insnbuf, const void *target,
 static void *get_call_destination(u8 type)
 {
 	struct paravirt_patch_template tmpl = {
-		.pv_init_ops = pv_init_ops,
-		.pv_time_ops = pv_time_ops,
-		.pv_cpu_ops = pv_cpu_ops,
-		.pv_irq_ops = pv_irq_ops,
-		.pv_mmu_ops = pv_mmu_ops,
+		.pv_ops = pv_ops,
 #ifdef CONFIG_PARAVIRT_SPINLOCKS
 		.pv_lock_ops = pv_lock_ops,
 #endif
@@ -185,37 +181,18 @@ static u64 native_steal_clock(int cpu)
 	return 0;
 }
 
-struct pv_info pv_info = {
+__visible struct pv_ops pv_ops = {
 	.name = "bare hardware",
-};
-
-struct pv_init_ops pv_init_ops = {
 	.patch = native_patch,
-};
-
-struct pv_time_ops pv_time_ops = {
 	.sched_clock = native_sched_clock,
 	.steal_clock = native_steal_clock,
-};
-
-__visible struct pv_irq_ops pv_irq_ops = {
+	.io_delay = native_io_delay,
 	.save_fl = __PV_IS_CALLEE_SAVE(native_save_fl),
 	.restore_fl = __PV_IS_CALLEE_SAVE(native_restore_fl),
 	.irq_disable = __PV_IS_CALLEE_SAVE(native_irq_disable),
 	.irq_enable = __PV_IS_CALLEE_SAVE(native_irq_enable),
-};
-
-__visible struct pv_cpu_ops pv_cpu_ops = {
-	.io_delay = native_io_delay,
-};
-
-struct pv_mmu_ops pv_mmu_ops __ro_after_init = {
 	.flush_tlb_others = native_flush_tlb_others,
 	.exit_mmap = paravirt_nop,
 };
 
-EXPORT_SYMBOL_GPL(pv_time_ops);
-EXPORT_SYMBOL    (pv_cpu_ops);
-EXPORT_SYMBOL    (pv_mmu_ops);
-EXPORT_SYMBOL    (pv_info);
-EXPORT_SYMBOL    (pv_irq_ops);
+EXPORT_SYMBOL(pv_ops);

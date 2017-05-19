@@ -64,9 +64,9 @@ void common(void) {
 
 #ifdef CONFIG_PARAVIRT
 	BLANK();
-	OFFSET(PARAVIRT_PATCH_pv_irq_ops, paravirt_patch_template, pv_irq_ops);
-	OFFSET(PV_IRQ_irq_disable, pv_irq_ops, irq_disable);
-	OFFSET(PV_IRQ_irq_enable, pv_irq_ops, irq_enable);
+	OFFSET(PARAVIRT_PATCH_pv_ops, paravirt_patch_template, pv_ops);
+	OFFSET(PV_IRQ_irq_disable, pv_ops, irq_disable);
+	OFFSET(PV_IRQ_irq_enable, pv_ops, irq_enable);
 #endif
 #ifdef CONFIG_PARAVIRT_FULL
 	OFFSET(PARAVIRT_PATCH_pvfull_cpu_ops, paravirt_patch_template,

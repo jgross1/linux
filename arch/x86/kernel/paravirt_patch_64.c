@@ -2,10 +2,10 @@
 #include <asm/asm-offsets.h>
 #include <linux/stringify.h>
 
-DEF_NATIVE(pv_irq_ops, irq_disable, "cli");
-DEF_NATIVE(pv_irq_ops, irq_enable, "sti");
-DEF_NATIVE(pv_irq_ops, restore_fl, "pushq %rdi; popfq");
-DEF_NATIVE(pv_irq_ops, save_fl, "pushfq; popq %rax");
+DEF_NATIVE(pv_ops, irq_disable, "cli");
+DEF_NATIVE(pv_ops, irq_enable, "sti");
+DEF_NATIVE(pv_ops, restore_fl, "pushq %rdi; popfq");
+DEF_NATIVE(pv_ops, save_fl, "pushfq; popq %rax");
 
 DEF_NATIVE(, mov32, "mov %edi, %eax");
 DEF_NATIVE(, mov64, "mov %rdi, %rax");
@@ -52,10 +52,10 @@ unsigned native_patch(u8 type, u16 clobbers, void *ibuf,
 			end = end_##ops##_##x;			\
 			goto patch_site
 	switch(type) {
-		PATCH_SITE(pv_irq_ops, restore_fl);
-		PATCH_SITE(pv_irq_ops, save_fl);
-		PATCH_SITE(pv_irq_ops, irq_enable);
-		PATCH_SITE(pv_irq_ops, irq_disable);
+		PATCH_SITE(pv_ops, restore_fl);
+		PATCH_SITE(pv_ops, save_fl);
+		PATCH_SITE(pv_ops, irq_enable);
+		PATCH_SITE(pv_ops, irq_disable);
 #ifdef CONFIG_PARAVIRT_FULL
 		PATCH_SITE(pvfull_mmu_ops, read_cr2);
 		PATCH_SITE(pvfull_mmu_ops, read_cr3);

@@ -366,11 +366,6 @@ void xen_timer_resume(void)
 	}
 }
 
-static const struct pv_time_ops xen_time_ops __initconst = {
-	.sched_clock = xen_clocksource_read,
-	.steal_clock = xen_steal_clock,
-};
-
 static void __init xen_time_init(void)
 {
 	int cpu = smp_processor_id();
@@ -408,7 +403,8 @@ static void __init xen_time_init(void)
 
 void __ref xen_init_time_ops(void)
 {
-	pv_time_ops = xen_time_ops;
+	pv_ops.sched_clock = xen_clocksource_read;
+	pv_ops.steal_clock = xen_steal_clock;
 
 	x86_init.timers.timer_init = xen_time_init;
 	x86_init.timers.setup_percpu_clockev = x86_init_noop;
@@ -450,7 +446,8 @@ void __init xen_hvm_init_time_ops(void)
 		return;
 	}
 
-	pv_time_ops = xen_time_ops;
+	pv_ops.sched_clock = xen_clocksource_read;
+	pv_ops.steal_clock = xen_steal_clock;
 	x86_init.timers.setup_percpu_clockev = xen_time_init;
 	x86_cpuinit.setup_percpu_clockev = xen_hvm_setup_cpu_clockevents;
 

@@ -28,7 +28,7 @@ static inline enum paravirt_lazy_mode paravirt_get_lazy_mode(void)
 
 static inline unsigned long long paravirt_sched_clock(void)
 {
-	return PVOP_CALL0(unsigned long long, pv_time_ops.sched_clock);
+	return PVOP_CALL0(unsigned long long, pv_ops.sched_clock);
 }
 
 struct static_key;
@@ -37,23 +37,23 @@ extern struct static_key paravirt_steal_rq_enabled;
 
 static inline u64 paravirt_steal_clock(int cpu)
 {
-	return PVOP_CALL1(u64, pv_time_ops.steal_clock, cpu);
+	return PVOP_CALL1(u64, pv_ops.steal_clock, cpu);
 }
 
 /* The paravirtualized I/O functions */
 static inline void slow_down_io(void)
 {
-	pv_cpu_ops.io_delay();
+	pv_ops.io_delay();
 #ifdef REALLY_SLOW_IO
-	pv_cpu_ops.io_delay();
-	pv_cpu_ops.io_delay();
-	pv_cpu_ops.io_delay();
+	pv_ops.io_delay();
+	pv_ops.io_delay();
+	pv_ops.io_delay();
 #endif
 }
 
 static inline void paravirt_arch_exit_mmap(struct mm_struct *mm)
 {
-	PVOP_VCALL1(pv_mmu_ops.exit_mmap, mm);
+	PVOP_VCALL1(pv_ops.exit_mmap, mm);
 }
 
 static inline void flush_tlb_others(const struct cpumask *cpumask,
@@ -61,7 +61,7 @@ static inline void flush_tlb_others(const struct cpumask *cpumask,
 				    unsigned long start,
 				    unsigned long end)
 {
-	PVOP_VCALL4(pv_mmu_ops.flush_tlb_others, cpumask, mm, start, end);
+	PVOP_VCALL4(pv_ops.flush_tlb_others, cpumask, mm, start, end);
 }
 
 #if defined(CONFIG_SMP) && defined(CONFIG_PARAVIRT_SPINLOCKS)
@@ -173,22 +173,22 @@ static __always_inline bool pv_vcpu_is_preempted(long cpu)
 
 static inline notrace unsigned long arch_local_save_flags(void)
 {
-	return PVOP_CALLEE0(unsigned long, pv_irq_ops.save_fl);
+	return PVOP_CALLEE0(unsigned long, pv_ops.save_fl);
 }
 
 static inline notrace void arch_local_irq_restore(unsigned long f)
 {
-	PVOP_VCALLEE1(pv_irq_ops.restore_fl, f);
+	PVOP_VCALLEE1(pv_ops.restore_fl, f);
 }
 
 static inline notrace void arch_local_irq_disable(void)
 {
-	PVOP_VCALLEE0(pv_irq_ops.irq_disable);
+	PVOP_VCALLEE0(pv_ops.irq_disable);
 }
 
 static inline notrace void arch_local_irq_enable(void)
 {
-	PVOP_VCALLEE0(pv_irq_ops.irq_enable);
+	PVOP_VCALLEE0(pv_ops.irq_enable);
 }
 
 static inline notrace unsigned long arch_local_irq_save(void)
@@ -286,15 +286,15 @@ extern void default_banner(void);
 #endif
 
 #define DISABLE_INTERRUPTS(clobbers)					\
-	PARA_SITE(PARA_PATCH(pv_irq_ops, PV_IRQ_irq_disable), clobbers, \
+	PARA_SITE(PARA_PATCH(pv_ops, PV_IRQ_irq_disable), clobbers,	\
 		  PV_SAVE_REGS(clobbers | CLBR_CALLEE_SAVE);		\
-		  call PARA_INDIRECT(pv_irq_ops+PV_IRQ_irq_disable);	\
+		  call PARA_INDIRECT(pv_ops+PV_IRQ_irq_disable);	\
 		  PV_RESTORE_REGS(clobbers | CLBR_CALLEE_SAVE);)
 
 #define ENABLE_INTERRUPTS(clobbers)					\
-	PARA_SITE(PARA_PATCH(pv_irq_ops, PV_IRQ_irq_enable), clobbers,	\
+	PARA_SITE(PARA_PATCH(pv_ops, PV_IRQ_irq_enable), clobbers,	\
 		  PV_SAVE_REGS(clobbers | CLBR_CALLEE_SAVE);		\
-		  call PARA_INDIRECT(pv_irq_ops+PV_IRQ_irq_enable);	\
+		  call PARA_INDIRECT(pv_ops+PV_IRQ_irq_enable);		\
 		  PV_RESTORE_REGS(clobbers | CLBR_CALLEE_SAVE);)
 
 #endif /* __ASSEMBLY__ */

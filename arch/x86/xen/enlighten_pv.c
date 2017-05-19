@@ -142,7 +142,7 @@ static void __init xen_banner(void)
 	struct xen_extraversion extra;
 	HYPERVISOR_xen_version(XENVER_extraversion, &extra);
 
-	pr_info("Booting paravirtualized kernel on %s\n", pv_info.name);
+	pr_info("Booting paravirtualized kernel on %s\n", pv_ops.name);
 	printk(KERN_INFO "Xen version: %d.%d%s%s\n",
 	       version >> 16, version & 0xffff, extra.extraversion,
 	       xen_feature(XENFEAT_mmu_pt_update_preserve_ad) ? " (preserve-AD)" : "");
@@ -991,10 +991,10 @@ void xen_setup_vcpu_info_placement(void)
 	 * percpu area for all cpus, so make use of it.
 	 */
 	if (xen_have_vcpu_info_placement) {
-		pv_irq_ops.save_fl = __PV_IS_CALLEE_SAVE(xen_save_fl_direct);
-		pv_irq_ops.restore_fl = __PV_IS_CALLEE_SAVE(xen_restore_fl_direct);
-		pv_irq_ops.irq_disable = __PV_IS_CALLEE_SAVE(xen_irq_disable_direct);
-		pv_irq_ops.irq_enable = __PV_IS_CALLEE_SAVE(xen_irq_enable_direct);
+		pv_ops.save_fl = __PV_IS_CALLEE_SAVE(xen_save_fl_direct);
+		pv_ops.restore_fl = __PV_IS_CALLEE_SAVE(xen_restore_fl_direct);
+		pv_ops.irq_disable = __PV_IS_CALLEE_SAVE(xen_irq_disable_direct);
+		pv_ops.irq_enable = __PV_IS_CALLEE_SAVE(xen_irq_enable_direct);
 		pvfull_mmu_ops.read_cr2 = xen_read_cr2_direct;
 	}
 }
@@ -1017,10 +1017,10 @@ static unsigned xen_patch(u8 type, u16 clobbers, void *insnbuf,
 	goto patch_site
 
 	switch (type) {
-		SITE(pv_irq_ops, irq_enable);
-		SITE(pv_irq_ops, irq_disable);
-		SITE(pv_irq_ops, save_fl);
-		SITE(pv_irq_ops, restore_fl);
+		SITE(pv_ops, irq_enable);
+		SITE(pv_ops, irq_disable);
+		SITE(pv_ops, save_fl);
+		SITE(pv_ops, restore_fl);
 #undef SITE
 
 	patch_site:
@@ -1058,10 +1058,6 @@ static const struct pvfull_info xen_info __initconst = {
 #ifdef CONFIG_X86_64
 	.extra_user_64bit_cs = FLAT_USER_CS64,
 #endif
-};
-
-static const struct pv_init_ops xen_init_ops __initconst = {
-	.patch = xen_patch,
 };
 
 static const struct pvfull_cpu_ops xen_cpu_ops __initconst = {
@@ -1260,10 +1256,10 @@ asmlinkage __visible void __init xen_start_kernel(void)
 
 	/* Install Xen paravirt ops */
 	pvfull_info = xen_info;
-	pv_info.name = "Xen";
-	pv_init_ops = xen_init_ops;
+	pv_ops.name = "Xen";
+	pv_ops.patch = xen_patch;
+	pv_ops.io_delay = xen_io_delay;
 	pvfull_cpu_ops = xen_cpu_ops;
-	pv_cpu_ops.io_delay = xen_io_delay;
 
 	x86_platform.get_nmi_reason = xen_get_nmi_reason;
 

@@ -2493,8 +2493,8 @@ void __init xen_init_mmu_ops(void)
 	x86_init.paging.pagetable_init = xen_pagetable_init;
 
 	pvfull_mmu_ops = xen_mmu_ops;
-	pv_mmu_ops.flush_tlb_others = xen_flush_tlb_others;
-	pv_mmu_ops.exit_mmap = xen_exit_mmap;
+	pv_ops.flush_tlb_others = xen_flush_tlb_others;
+	pv_ops.exit_mmap = xen_exit_mmap;
 
 	memset(dummy_mapping, 0xff, PAGE_SIZE);
 }

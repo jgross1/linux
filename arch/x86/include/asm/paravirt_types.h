@@ -65,11 +65,9 @@ struct paravirt_callee_save {
 #endif
 
 /* general info */
-struct pv_info {
+struct pv_ops {
 	const char *name;
-};
 
-struct pv_init_ops {
 	/*
 	 * Patch may replace one of the defined code sequences with
 	 * arbitrary code, subject to the same register constraints.
@@ -80,18 +78,12 @@ struct pv_init_ops {
 	 */
 	unsigned (*patch)(u8 type, u16 clobber, void *insnbuf,
 			  unsigned long addr, unsigned len);
-};
 
-struct pv_time_ops {
 	unsigned long long (*sched_clock)(void);
 	unsigned long long (*steal_clock)(int cpu);
-};
 
-struct pv_cpu_ops {
 	void (*io_delay)(void);
-};
 
-struct pv_irq_ops {
 	/*
 	 * Get/set interrupt state.  save_fl and restore_fl are only
 	 * expected to use X86_EFLAGS_IF; all other bits
@@ -105,9 +97,7 @@ struct pv_irq_ops {
 	struct paravirt_callee_save restore_fl;
 	struct paravirt_callee_save irq_disable;
 	struct paravirt_callee_save irq_enable;
-};
 
-struct pv_mmu_ops {
 	void (*exit_mmap)(struct mm_struct *mm);
 	void (*flush_tlb_others)(const struct cpumask *cpus,
 				 struct mm_struct *mm,
@@ -136,11 +126,7 @@ struct pv_lock_ops {
  * number for each function using the offset which we use to indicate
  * what to patch. */
 struct paravirt_patch_template {
-	struct pv_init_ops pv_init_ops;
-	struct pv_time_ops pv_time_ops;
-	struct pv_cpu_ops pv_cpu_ops;
-	struct pv_irq_ops pv_irq_ops;
-	struct pv_mmu_ops pv_mmu_ops;
+	struct pv_ops pv_ops;
 	struct pv_lock_ops pv_lock_ops;
 #ifdef CONFIG_PARAVIRT_FULL
 	struct pvfull_cpu_ops pvfull_cpu_ops;
@@ -149,12 +135,7 @@ struct paravirt_patch_template {
 #endif
 };
 
-extern struct pv_info pv_info;
-extern struct pv_init_ops pv_init_ops;
-extern struct pv_time_ops pv_time_ops;
-extern struct pv_cpu_ops pv_cpu_ops;
-extern struct pv_irq_ops pv_irq_ops;
-extern struct pv_mmu_ops pv_mmu_ops;
+extern struct pv_ops pv_ops;
 extern struct pv_lock_ops pv_lock_ops;
 
 #define PARAVIRT_PATCH(x)					\
@@ -247,7 +228,7 @@ unsigned native_patch(u8 type, u16 clobbers, void *ibuf,
  * The call instruction itself is marked by placing its start address
  * and size into the .parainstructions section, so that
  * apply_paravirt() in arch/i386/kernel/alternative.c can do the
- * appropriate patching under the control of the backend pv_init_ops
+ * appropriate patching under the control of the backend pv_ops
  * implementation.
  *
  * Unfortunately there's no way to get gcc to generate the args setup
