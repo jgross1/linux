@@ -1404,7 +1404,7 @@ __init void lguest_init(void)
 	pv_irq_ops.restore_fl = __PV_IS_CALLEE_SAVE(lg_restore_fl);
 	pv_irq_ops.irq_disable = PV_CALLEE_SAVE(lguest_irq_disable);
 	pv_irq_ops.irq_enable = __PV_IS_CALLEE_SAVE(lg_irq_enable);
-	pv_irq_ops.safe_halt = lguest_safe_halt;
+	pvfull_irq_ops.safe_halt = lguest_safe_halt;
 
 	/* Setup operations */
 	pv_init_ops.patch = lguest_patch;

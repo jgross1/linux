@@ -120,7 +120,9 @@ static const struct pv_irq_ops xen_irq_ops __initconst = {
 	.restore_fl = PV_CALLEE_SAVE(xen_restore_fl),
 	.irq_disable = PV_CALLEE_SAVE(xen_irq_disable),
 	.irq_enable = PV_CALLEE_SAVE(xen_irq_enable),
+};
 
+static const struct pvfull_irq_ops xen_full_irq_ops __initconst = {
 	.safe_halt = xen_safe_halt,
 	.halt = xen_halt,
 #ifdef CONFIG_X86_64
@@ -131,5 +133,6 @@ static const struct pv_irq_ops xen_irq_ops __initconst = {
 void __init xen_init_irq_ops(void)
 {
 	pv_irq_ops = xen_irq_ops;
+	pvfull_irq_ops = xen_full_irq_ops;
 	x86_init.irqs.intr_init = xen_init_IRQ;
 }

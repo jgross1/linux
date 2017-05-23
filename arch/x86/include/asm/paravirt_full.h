@@ -231,6 +231,16 @@ static inline void arch_end_context_switch(struct task_struct *next)
 	PVOP_VCALL1(pvfull_cpu_ops.end_context_switch, next);
 }
 
+static inline void arch_safe_halt(void)
+{
+	PVOP_VCALL0(pvfull_irq_ops.safe_halt);
+}
+
+static inline void halt(void)
+{
+	PVOP_VCALL0(pvfull_irq_ops.halt);
+}
+
 #else /* __ASSEMBLY__ */
 
 #define INTERRUPT_RETURN						\
@@ -267,6 +277,13 @@ static inline void arch_end_context_switch(struct task_struct *next)
 	PARA_SITE(PARA_PATCH(pvfull_cpu_ops, PV_CPU_usergs_sysret64),	\
 		  CLBR_NONE,						\
 		  jmp PARA_INDIRECT(pvfull_cpu_ops+PV_CPU_usergs_sysret64))
+
+#define PARAVIRT_ADJUST_EXCEPTION_FRAME					\
+	PARA_SITE(PARA_PATCH(pvfull_irq_ops, PV_IRQ_adjust_exception_frame), \
+		  CLBR_NONE,						\
+		  call PARA_INDIRECT(pvfull_irq_ops +			\
+				     PV_IRQ_adjust_exception_frame))
+
 #endif  /* CONFIG_X86_32 */
 
 #endif /* __ASSEMBLY__ */

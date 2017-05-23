@@ -87,6 +87,26 @@ static inline notrace void arch_local_irq_enable(void)
 }
 
 /*
+ * For spinlocks, etc:
+ */
+static inline notrace unsigned long arch_local_irq_save(void)
+{
+	unsigned long flags = arch_local_save_flags();
+	arch_local_irq_disable();
+	return flags;
+}
+#else
+
+#define ENABLE_INTERRUPTS(x)	sti
+#define DISABLE_INTERRUPTS(x)	cli
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_PARAVIRT */
+
+#ifndef CONFIG_PARAVIRT_FULL
+#ifndef __ASSEMBLY__
+
+/*
  * Used in the idle loop; sti takes one instruction cycle
  * to complete:
  */
@@ -104,29 +124,7 @@ static inline __cpuidle void halt(void)
 	native_halt();
 }
 
-/*
- * For spinlocks, etc:
- */
-static inline notrace unsigned long arch_local_irq_save(void)
-{
-	unsigned long flags = arch_local_save_flags();
-	arch_local_irq_disable();
-	return flags;
-}
 #else
-
-#define ENABLE_INTERRUPTS(x)	sti
-#define DISABLE_INTERRUPTS(x)	cli
-
-#ifdef CONFIG_X86_64
-#define PARAVIRT_ADJUST_EXCEPTION_FRAME	/*  */
-#endif
-
-#endif /* __ASSEMBLY__ */
-#endif /* CONFIG_PARAVIRT */
-
-#ifndef CONFIG_PARAVIRT_FULL
-#ifdef __ASSEMBLY__
 
 #ifdef CONFIG_X86_64
 #define SWAPGS	swapgs
@@ -148,6 +146,8 @@ static inline notrace unsigned long arch_local_irq_save(void)
 #define USERGS_SYSRET32				\
 	swapgs;					\
 	sysretl
+
+#define PARAVIRT_ADJUST_EXCEPTION_FRAME        /*  */
 
 #else
 #define INTERRUPT_RETURN		iret

@@ -77,6 +77,16 @@ struct pvfull_cpu_ops {
 	void (*end_context_switch)(struct task_struct *next);
 };
 
+struct pvfull_irq_ops {
+	void (*safe_halt)(void);
+	void (*halt)(void);
+
+#ifdef CONFIG_X86_64
+	void (*adjust_exception_frame)(void);
+#endif
+};
+
 extern struct pvfull_cpu_ops pvfull_cpu_ops;
+extern struct pvfull_irq_ops pvfull_irq_ops;
 
 #endif  /* _ASM_X86_PARAVIRT_TYPES_FULL_H */

@@ -72,6 +72,8 @@ void common(void) {
 #ifdef CONFIG_PARAVIRT_FULL
 	OFFSET(PARAVIRT_PATCH_pvfull_cpu_ops, paravirt_patch_template,
 	       pvfull_cpu_ops);
+	OFFSET(PARAVIRT_PATCH_pvfull_irq_ops, paravirt_patch_template,
+	       pvfull_irq_ops);
 	OFFSET(PV_CPU_iret, pvfull_cpu_ops, iret);
 	OFFSET(PV_CPU_read_cr0, pvfull_cpu_ops, read_cr0);
 #endif

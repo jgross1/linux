@@ -19,10 +19,9 @@ static char syscalls_ia32[] = {
 
 int main(void)
 {
-#ifdef CONFIG_PARAVIRT
-	OFFSET(PV_IRQ_adjust_exception_frame, pv_irq_ops, adjust_exception_frame);
-#endif
 #ifdef CONFIG_PARAVIRT_FULL
+	OFFSET(PV_IRQ_adjust_exception_frame, pvfull_irq_ops,
+	       adjust_exception_frame);
 	OFFSET(PV_CPU_usergs_sysret64, pvfull_cpu_ops, usergs_sysret64);
 	OFFSET(PV_CPU_swapgs, pvfull_cpu_ops, swapgs);
 	BLANK();

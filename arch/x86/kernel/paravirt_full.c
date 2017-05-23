@@ -74,9 +74,18 @@ __visible struct pvfull_cpu_ops pvfull_cpu_ops = {
 	.end_context_switch = paravirt_nop,
 };
 
+__visible struct pvfull_irq_ops pvfull_irq_ops = {
+	.safe_halt = native_safe_halt,
+	.halt = native_halt,
+#ifdef CONFIG_X86_64
+	.adjust_exception_frame = paravirt_nop,
+#endif
+};
+
 /* At this point, native_get/set_debugreg has real function entries */
 NOKPROBE_SYMBOL(native_get_debugreg);
 NOKPROBE_SYMBOL(native_set_debugreg);
 NOKPROBE_SYMBOL(native_load_idt);
 
 EXPORT_SYMBOL(pvfull_cpu_ops);
+EXPORT_SYMBOL_GPL(pvfull_irq_ops);

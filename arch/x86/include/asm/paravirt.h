@@ -39,16 +39,6 @@ static inline void write_cr3(unsigned long x)
 	PVOP_VCALL1(pv_mmu_ops.write_cr3, x);
 }
 
-static inline void arch_safe_halt(void)
-{
-	PVOP_VCALL0(pv_irq_ops.safe_halt);
-}
-
-static inline void halt(void)
-{
-	PVOP_VCALL0(pv_irq_ops.halt);
-}
-
 #define get_kernel_rpl()  (pv_info.kernel_rpl)
 
 static inline unsigned long long paravirt_sched_clock(void)
@@ -720,11 +710,6 @@ extern void default_banner(void);
 
 #define GET_CR2_INTO_RAX				\
 	call PARA_INDIRECT(pv_mmu_ops+PV_MMU_read_cr2)
-
-#define PARAVIRT_ADJUST_EXCEPTION_FRAME					\
-	PARA_SITE(PARA_PATCH(pv_irq_ops, PV_IRQ_adjust_exception_frame), \
-		  CLBR_NONE,						\
-		  call PARA_INDIRECT(pv_irq_ops+PV_IRQ_adjust_exception_frame))
 
 #endif	/* CONFIG_X86_64 */
 

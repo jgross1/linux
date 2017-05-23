@@ -120,13 +120,6 @@ struct pv_irq_ops {
 	struct paravirt_callee_save restore_fl;
 	struct paravirt_callee_save irq_disable;
 	struct paravirt_callee_save irq_enable;
-
-	void (*safe_halt)(void);
-	void (*halt)(void);
-
-#ifdef CONFIG_X86_64
-	void (*adjust_exception_frame)(void);
-#endif
 };
 
 struct pv_mmu_ops {
@@ -266,6 +259,7 @@ struct paravirt_patch_template {
 	struct pv_lock_ops pv_lock_ops;
 #ifdef CONFIG_PARAVIRT_FULL
 	struct pvfull_cpu_ops pvfull_cpu_ops;
+	struct pvfull_irq_ops pvfull_irq_ops;
 #endif
 };
 
