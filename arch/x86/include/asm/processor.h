@@ -531,7 +531,7 @@ static inline unsigned long current_top_of_stack(void)
 #endif
 }
 
-#ifdef CONFIG_PARAVIRT
+#ifdef CONFIG_PARAVIRT_FULL
 #include <asm/paravirt.h>
 #else
 #define __cpuid			native_cpuid
@@ -543,7 +543,7 @@ static inline void load_sp0(struct tss_struct *tss,
 }
 
 #define set_iopl_mask native_set_iopl_mask
-#endif /* CONFIG_PARAVIRT */
+#endif /* CONFIG_PARAVIRT_FULL */
 
 /* Free all resources held by a thread. */
 extern void release_thread(struct task_struct *);

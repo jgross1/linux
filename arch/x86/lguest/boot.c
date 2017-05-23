@@ -1410,25 +1410,25 @@ __init void lguest_init(void)
 	pv_init_ops.patch = lguest_patch;
 
 	/* Intercepts of various CPU instructions */
-	pv_cpu_ops.load_gdt = lguest_load_gdt;
-	pv_cpu_ops.cpuid = lguest_cpuid;
-	pv_cpu_ops.load_idt = lguest_load_idt;
-	pv_cpu_ops.iret = lguest_iret;
-	pv_cpu_ops.load_sp0 = lguest_load_sp0;
-	pv_cpu_ops.load_tr_desc = lguest_load_tr_desc;
-	pv_cpu_ops.set_ldt = lguest_set_ldt;
-	pv_cpu_ops.load_tls = lguest_load_tls;
-	pv_cpu_ops.get_debugreg = lguest_get_debugreg;
-	pv_cpu_ops.set_debugreg = lguest_set_debugreg;
-	pv_cpu_ops.read_cr0 = lguest_read_cr0;
-	pv_cpu_ops.write_cr0 = lguest_write_cr0;
-	pv_cpu_ops.read_cr4 = lguest_read_cr4;
-	pv_cpu_ops.write_cr4 = lguest_write_cr4;
-	pv_cpu_ops.write_gdt_entry = lguest_write_gdt_entry;
-	pv_cpu_ops.write_idt_entry = lguest_write_idt_entry;
-	pv_cpu_ops.wbinvd = lguest_wbinvd;
-	pv_cpu_ops.start_context_switch = paravirt_start_context_switch;
-	pv_cpu_ops.end_context_switch = lguest_end_context_switch;
+	pvfull_cpu_ops.load_gdt = lguest_load_gdt;
+	pvfull_cpu_ops.cpuid = lguest_cpuid;
+	pvfull_cpu_ops.load_idt = lguest_load_idt;
+	pvfull_cpu_ops.iret = lguest_iret;
+	pvfull_cpu_ops.load_sp0 = lguest_load_sp0;
+	pvfull_cpu_ops.load_tr_desc = lguest_load_tr_desc;
+	pvfull_cpu_ops.set_ldt = lguest_set_ldt;
+	pvfull_cpu_ops.load_tls = lguest_load_tls;
+	pvfull_cpu_ops.get_debugreg = lguest_get_debugreg;
+	pvfull_cpu_ops.set_debugreg = lguest_set_debugreg;
+	pvfull_cpu_ops.read_cr0 = lguest_read_cr0;
+	pvfull_cpu_ops.write_cr0 = lguest_write_cr0;
+	pvfull_cpu_ops.read_cr4 = lguest_read_cr4;
+	pvfull_cpu_ops.write_cr4 = lguest_write_cr4;
+	pvfull_cpu_ops.write_gdt_entry = lguest_write_gdt_entry;
+	pvfull_cpu_ops.write_idt_entry = lguest_write_idt_entry;
+	pvfull_cpu_ops.wbinvd = lguest_wbinvd;
+	pvfull_cpu_ops.start_context_switch = paravirt_start_context_switch;
+	pvfull_cpu_ops.end_context_switch = lguest_end_context_switch;
 
 	/* Pagetable management */
 	pv_mmu_ops.write_cr3 = lguest_write_cr3;

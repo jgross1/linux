@@ -231,7 +231,7 @@ static inline unsigned long long native_read_pmc(int counter)
 	return EAX_EDX_VAL(val, low, high);
 }
 
-#ifdef CONFIG_PARAVIRT
+#ifdef CONFIG_PARAVIRT_FULL
 #include <asm/paravirt.h>
 #else
 #include <linux/errno.h>
@@ -294,7 +294,7 @@ do {							\
 
 #define rdpmcl(counter, val) ((val) = native_read_pmc(counter))
 
-#endif	/* !CONFIG_PARAVIRT */
+#endif	/* !CONFIG_PARAVIRT_FULL */
 
 /*
  * 64-bit version of wrmsr_safe():

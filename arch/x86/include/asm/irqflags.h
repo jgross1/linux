@@ -119,6 +119,16 @@ static inline notrace unsigned long arch_local_irq_save(void)
 #define DISABLE_INTERRUPTS(x)	cli
 
 #ifdef CONFIG_X86_64
+#define PARAVIRT_ADJUST_EXCEPTION_FRAME	/*  */
+#endif
+
+#endif /* __ASSEMBLY__ */
+#endif /* CONFIG_PARAVIRT */
+
+#ifndef CONFIG_PARAVIRT_FULL
+#ifdef __ASSEMBLY__
+
+#ifdef CONFIG_X86_64
 #define SWAPGS	swapgs
 /*
  * Currently paravirt can't handle swapgs nicely when we
@@ -131,8 +141,6 @@ static inline notrace unsigned long arch_local_irq_save(void)
  */
 #define SWAPGS_UNSAFE_STACK	swapgs
 
-#define PARAVIRT_ADJUST_EXCEPTION_FRAME	/*  */
-
 #define INTERRUPT_RETURN	jmp native_iret
 #define USERGS_SYSRET64				\
 	swapgs;					\
@@ -143,13 +151,11 @@ static inline notrace unsigned long arch_local_irq_save(void)
 
 #else
 #define INTERRUPT_RETURN		iret
-#define ENABLE_INTERRUPTS_SYSEXIT	sti; sysexit
 #define GET_CR0_INTO_EAX		movl %cr0, %eax
 #endif
 
-
 #endif /* __ASSEMBLY__ */
-#endif /* CONFIG_PARAVIRT */
+#endif /* CONFIG_PARAVIRT_FULL */
 
 #ifndef __ASSEMBLY__
 static inline int arch_irqs_disabled_flags(unsigned long flags)

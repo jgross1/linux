@@ -1065,7 +1065,7 @@ static const struct pv_init_ops xen_init_ops __initconst = {
 	.patch = xen_patch,
 };
 
-static const struct pv_cpu_ops xen_cpu_ops __initconst = {
+static const struct pvfull_cpu_ops xen_cpu_ops __initconst = {
 	.cpuid = xen_cpuid,
 
 	.set_debugreg = xen_set_debugreg,
@@ -1118,7 +1118,6 @@ static const struct pv_cpu_ops xen_cpu_ops __initconst = {
 	.load_sp0 = xen_load_sp0,
 
 	.set_iopl_mask = xen_set_iopl_mask,
-	.io_delay = xen_io_delay,
 
 	/* Xen takes care of %gs when switching to usermode for us */
 	.swapgs = paravirt_nop,
@@ -1229,14 +1228,14 @@ static void __init xen_boot_params_init_edd(void)
  */
 static void xen_setup_gdt(int cpu)
 {
-	pv_cpu_ops.write_gdt_entry = xen_write_gdt_entry_boot;
-	pv_cpu_ops.load_gdt = xen_load_gdt_boot;
+	pvfull_cpu_ops.write_gdt_entry = xen_write_gdt_entry_boot;
+	pvfull_cpu_ops.load_gdt = xen_load_gdt_boot;
 
 	setup_stack_canary_segment(0);
 	switch_to_new_gdt(0);
 
-	pv_cpu_ops.write_gdt_entry = xen_write_gdt_entry;
-	pv_cpu_ops.load_gdt = xen_load_gdt;
+	pvfull_cpu_ops.write_gdt_entry = xen_write_gdt_entry;
+	pvfull_cpu_ops.load_gdt = xen_load_gdt;
 }
 
 static void __init xen_dom0_set_legacy_features(void)
@@ -1263,7 +1262,8 @@ asmlinkage __visible void __init xen_start_kernel(void)
 	/* Install Xen paravirt ops */
 	pv_info = xen_info;
 	pv_init_ops = xen_init_ops;
-	pv_cpu_ops = xen_cpu_ops;
+	pvfull_cpu_ops = xen_cpu_ops;
+	pv_cpu_ops.io_delay = xen_io_delay;
 
 	x86_platform.get_nmi_reason = xen_get_nmi_reason;
 

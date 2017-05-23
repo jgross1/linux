@@ -139,16 +139,6 @@ extern asmlinkage void native_load_gs_index(unsigned);
 #include <asm/paravirt.h>
 #else
 
-static inline unsigned long read_cr0(void)
-{
-	return native_read_cr0();
-}
-
-static inline void write_cr0(unsigned long x)
-{
-	native_write_cr0(x);
-}
-
 static inline unsigned long read_cr2(void)
 {
 	return native_read_cr2();
@@ -167,6 +157,20 @@ static inline unsigned long read_cr3(void)
 static inline void write_cr3(unsigned long x)
 {
 	native_write_cr3(x);
+}
+
+#endif/* CONFIG_PARAVIRT */
+
+#ifndef CONFIG_PARAVIRT_FULL
+
+static inline unsigned long read_cr0(void)
+{
+	return native_read_cr0();
+}
+
+static inline void write_cr0(unsigned long x)
+{
+	native_write_cr0(x);
 }
 
 static inline unsigned long __read_cr4(void)
@@ -203,7 +207,8 @@ static inline void load_gs_index(unsigned selector)
 
 #endif
 
-#endif/* CONFIG_PARAVIRT */
+#endif /* CONFIG_PARAVIRT_FULL */
+
 
 static inline void clflush(volatile void *__p)
 {

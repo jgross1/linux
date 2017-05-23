@@ -24,12 +24,9 @@
 #include <linux/efi.h>
 #include <linux/bcd.h>
 #include <linux/highmem.h>
-#include <linux/kprobes.h>
 
 #include <asm/bug.h>
 #include <asm/paravirt.h>
-#include <asm/debugreg.h>
-#include <asm/desc.h>
 #include <asm/setup.h>
 #include <asm/pgtable.h>
 #include <asm/time.h>
@@ -128,6 +125,9 @@ static void *get_call_destination(u8 type)
 #ifdef CONFIG_PARAVIRT_SPINLOCKS
 		.pv_lock_ops = pv_lock_ops,
 #endif
+#ifdef CONFIG_PARAVIRT_FULL
+		.pvfull_cpu_ops = pvfull_cpu_ops,
+#endif
 	};
 	return *((void **)&tmpl + type);
 }
@@ -150,10 +150,12 @@ unsigned paravirt_patch_default(u8 type, u16 clobbers, void *insnbuf,
 	else if (opfunc == _paravirt_ident_64)
 		ret = paravirt_patch_ident_64(insnbuf, len);
 
-	else if (type == PARAVIRT_PATCH(pv_cpu_ops.iret) ||
-		 type == PARAVIRT_PATCH(pv_cpu_ops.usergs_sysret64))
+#ifdef CONFIG_PARAVIRT_FULL
+	else if (type == PARAVIRT_PATCH(pvfull_cpu_ops.iret) ||
+		 type == PARAVIRT_PATCH(pvfull_cpu_ops.usergs_sysret64))
 		/* If operation requires a jmp, then jmp */
 		ret = paravirt_patch_jmp(insnbuf, opfunc, addr, len);
+#endif
 	else
 		/* Otherwise call the function; assume target could
 		   clobber any caller-save reg */
@@ -202,10 +204,6 @@ static u64 native_steal_clock(int cpu)
 {
 	return 0;
 }
-
-/* These are in entry.S */
-extern void native_iret(void);
-extern void native_usergs_sysret64(void);
 
 static DEFINE_PER_CPU(enum paravirt_lazy_mode, paravirt_lazy_mode) = PARAVIRT_LAZY_NONE;
 
@@ -306,59 +304,8 @@ __visible struct pv_irq_ops pv_irq_ops = {
 };
 
 __visible struct pv_cpu_ops pv_cpu_ops = {
-	.cpuid = native_cpuid,
-	.get_debugreg = native_get_debugreg,
-	.set_debugreg = native_set_debugreg,
-	.read_cr0 = native_read_cr0,
-	.write_cr0 = native_write_cr0,
-	.read_cr4 = native_read_cr4,
-	.write_cr4 = native_write_cr4,
-#ifdef CONFIG_X86_64
-	.read_cr8 = native_read_cr8,
-	.write_cr8 = native_write_cr8,
-#endif
-	.wbinvd = native_wbinvd,
-	.read_msr = native_read_msr,
-	.write_msr = native_write_msr,
-	.read_msr_safe = native_read_msr_safe,
-	.write_msr_safe = native_write_msr_safe,
-	.read_pmc = native_read_pmc,
-	.load_tr_desc = native_load_tr_desc,
-	.set_ldt = native_set_ldt,
-	.load_gdt = native_load_gdt,
-	.load_idt = native_load_idt,
-	.store_idt = native_store_idt,
-	.store_tr = native_store_tr,
-	.load_tls = native_load_tls,
-#ifdef CONFIG_X86_64
-	.load_gs_index = native_load_gs_index,
-#endif
-	.write_ldt_entry = native_write_ldt_entry,
-	.write_gdt_entry = native_write_gdt_entry,
-	.write_idt_entry = native_write_idt_entry,
-
-	.alloc_ldt = paravirt_nop,
-	.free_ldt = paravirt_nop,
-
-	.load_sp0 = native_load_sp0,
-
-#ifdef CONFIG_X86_64
-	.usergs_sysret64 = native_usergs_sysret64,
-#endif
-	.iret = native_iret,
-	.swapgs = native_swapgs,
-
-	.set_iopl_mask = native_set_iopl_mask,
 	.io_delay = native_io_delay,
-
-	.start_context_switch = paravirt_nop,
-	.end_context_switch = paravirt_nop,
 };
-
-/* At this point, native_get/set_debugreg has real function entries */
-NOKPROBE_SYMBOL(native_get_debugreg);
-NOKPROBE_SYMBOL(native_set_debugreg);
-NOKPROBE_SYMBOL(native_load_idt);
 
 #if defined(CONFIG_X86_32) && !defined(CONFIG_X86_PAE)
 /* 32-bit pagetable entries */
