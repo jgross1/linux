@@ -60,6 +60,10 @@ struct paravirt_callee_save {
 	void *func;
 };
 
+#ifdef CONFIG_PARAVIRT_FULL
+#include <asm/paravirt_types_full.h>
+#endif
+
 /* general info */
 struct pv_info {
 	unsigned int kernel_rpl;

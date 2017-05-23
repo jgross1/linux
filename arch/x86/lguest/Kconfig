@@ -1,6 +1,7 @@
 config LGUEST_GUEST
 	bool "Lguest guest support"
 	depends on X86_32 && PARAVIRT && PCI
+	select PARAVIRT_FULL
 	select TTY
 	select VIRTUALIZATION
 	select VIRTIO

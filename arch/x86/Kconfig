@@ -738,6 +738,10 @@ config PARAVIRT_SPINLOCKS
 
 	  If you are unsure how to answer this question, answer Y.
 
+config PARAVIRT_FULL
+	bool
+	depends on PARAVIRT
+
 config QUEUED_LOCK_STAT
 	bool "Paravirt queued spinlock statistics"
 	depends on PARAVIRT_SPINLOCKS && DEBUG_FS

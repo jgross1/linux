@@ -17,6 +17,7 @@ config XEN_PV
 	bool "Xen PV guest support"
 	default y
 	depends on XEN
+	select PARAVIRT_FULL
 	select XEN_HAVE_PVMMU
 	select XEN_HAVE_VPMU
 	help

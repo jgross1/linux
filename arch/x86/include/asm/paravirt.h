@@ -15,6 +15,10 @@
 #include <linux/cpumask.h>
 #include <asm/frame.h>
 
+#ifdef CONFIG_PARAVIRT_FULL
+#include <asm/paravirt_full.h>
+#endif
+
 static inline void load_sp0(struct tss_struct *tss,
 			     struct thread_struct *thread)
 {
@@ -914,6 +918,10 @@ extern void default_banner(void);
 #define PARA_PATCH(struct, off)        ((PARAVIRT_PATCH_##struct + (off)) / 4)
 #define PARA_SITE(ptype, clobbers, ops) _PVSITE(ptype, clobbers, ops, .long, 4)
 #define PARA_INDIRECT(addr)	*%cs:addr
+#endif
+
+#ifdef CONFIG_PARAVIRT_FULL
+#include <asm/paravirt_full.h>
 #endif
 
 #define INTERRUPT_RETURN						\
